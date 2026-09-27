@@ -18,12 +18,17 @@ func main(){
 		}
 		
 		command = strings.TrimSpace(command)
-		switch command{
-		case "":
+		
+		if command == ""{
 			continue
-		case "pwd":
+		}else if strings.HasPrefix(command, "whoami"){
+			utils.WhoAMI()
+		}else if strings.HasPrefix(command, "pwd"){
+
 			fmt.Println(fs.Currentpath)
-		case "cd":
+
+		}else if strings.HasPrefix(command, "cd"){
+
 			target := strings.TrimSpace(command[2:])
 
 			if err := fs.ChangeDirectory(target); err != nil{
@@ -31,13 +36,16 @@ func main(){
 			}
 
 			fmt.Println("Current Directory: ", fs.Currentpath)
-		case "ls":
+		}else if strings.HasPrefix(command, "ls"){
+
 			fs.ListHelper(strings.TrimSpace(command[2:]))
-		case "clear":
+
+		}else if command == "clear"{
+			
 			utils.ClearScr()
+
+		}else if command == "exit"{
 			break
-		case "exit":
-			return
 		}
 	}
 }
