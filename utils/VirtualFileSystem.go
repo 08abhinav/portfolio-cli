@@ -78,3 +78,41 @@ func (fs *FileSystem) ChangeDirectory(target string) error{
 func isInsideroot(p string) bool{
 	return p == "/root" || len(p) > len("/root") && p[:len("/root")+1] == "/root/"
 }
+
+func (fs *FileSystem) ResolvePath(p string) (*Node, error){
+	parts := strings.Split(path.Clean(p), "/")
+	current := fs.Root
+
+	for _, part := range parts{
+		if part == "" || part == "root"{
+			continue
+		}
+
+		next, exist := current.Children[part]
+		if !exist{
+			return nil, fmt.Errorf("Path does not exist: %s", p)
+		}
+		current = next
+	}
+	return current, nil
+}
+
+func (fs *FileSystem) ListHelper(target string){
+	var dir *Node
+	var err error
+
+	if len(target) == 0{
+		target = fs.Currentpath
+	}else{
+		target = strings.TrimSpace(path.Join(fs.Currentpath, target))
+	}
+
+	dir, err = fs.ResolvePath(target)
+	if err != nil{
+		fmt.Println(err)
+	}
+	
+	for key := range dir.Children{
+		fmt.Println(key)
+	}
+}
