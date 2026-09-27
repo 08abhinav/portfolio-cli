@@ -23,8 +23,16 @@ func main(){
 			continue
 		case "pwd":
 			fmt.Println(fs.Currentpath)
-			break
-		
+		case "cd":
+			target := strings.TrimSpace(command[2:])
+
+			if err := fs.ChangeDirectory(target); err != nil{
+				fmt.Println(err)
+			}
+
+			fmt.Println("Current Directory: ", fs.Currentpath)
+		case "ls":
+			fs.ListHelper(strings.TrimSpace(command[2:]))
 		case "clear":
 			utils.ClearScr()
 			break
