@@ -257,3 +257,62 @@ func (fs *FileSystem) ListHelper(target string) {
 	}
 }
 
+func (fs *FileSystem) TreeHelper(target string) {
+	var targetPath string
+	target = strings.TrimSpace(target)
+
+	if target == "" {
+		targetPath = fs.Currentpath
+	} else if strings.HasPrefix(target, "/") {
+		targetPath = path.Clean(target)
+	} else {
+		targetPath = path.Join(fs.Currentpath, target)
+	}
+
+	node, err := fs.ResolvePath(targetPath)
+	if err != nil {
+		fmt.Printf("%stree: cannot access '%s': No such file or directory%s\n", ColorRed, target, ColorReset)
+		return
+	}
+
+	if node.IsDir {
+		fmt.Printf("%s  %s%s%s/\n", node.Icon, ColorBold+ColorBlue, node.Name, ColorReset)
+	} else {
+		fmt.Printf("%s  %s\n", node.Icon, node.Name)
+		return
+	}
+
+	var printTree func(n *Node, prefix string)
+	printTree = func(n *Node, prefix string) {
+		keys := make([]string, 0, len(n.Children))
+		for k := range n.Children {
+			keys = append(keys, k)
+		}
+		sort.Strings(keys)
+
+		for i, k := range keys {
+			child := n.Children[k]
+			isLast := i == len(keys)-1
+
+			connector := "├── "
+			childPrefix := "│   "
+			if isLast {
+				connector = "└── "
+				childPrefix = "    "
+			}
+
+			if child.IsDir {
+				fmt.Printf("%s%s%s  %s%s%s/\n", prefix, connector, child.Icon, ColorBold+ColorBlue, child.Name, ColorReset)
+				printTree(child, prefix+childPrefix)
+			} else {
+				if len(child.Description) > 0 {
+					fmt.Printf("%s%s%s  %-20s %s%s%s\n", prefix, connector, child.Icon, child.Name, ColorComment, child.Description, ColorReset)
+				} else {
+					fmt.Printf("%s%s%s  %s\n", prefix, connector, child.Icon, child.Name)
+				}
+			}
+		}
+	}
+
+	printTree(node, "")
+}
