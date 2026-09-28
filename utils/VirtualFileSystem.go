@@ -3,7 +3,57 @@ package utils
 import (
 	"fmt"
 	"path"
+	"sort"
 	"strings"
+)
+
+const (
+	ColorReset   = "\033[0m"
+	ColorBold    = "\033[1m"
+	ColorDim     = "\033[2m"
+
+	ColorCyan    = "\033[38;2;80;250;123m" 
+	ColorBlue    = "\033[38;2;139;233;253m"
+	ColorPurple  = "\033[38;2;189;147;249m"
+	ColorOrange  = "\033[38;2;255;184;108m"
+	ColorRed     = "\033[38;2;255;85;85m"  
+	ColorComment = "\033[38;2;98;114;164m" 
+)
+
+const (
+	// Directories
+	IconFolder     = "\ue5fe" 
+	IconFolderOpen = "\ue5ff"
+	IconRoot       = "\uf015"
+
+	// Categories
+	IconCode      = "\uf121" 
+	IconTools     = "\uf0ad"
+	IconCloud     = "\uf0c2" 
+	IconSocial    = "\uf0c0" 
+
+	// Languages & Formats
+	IconGo         = "\ue627" 
+	IconJS         = "\ue74e" 
+	IconBash       = "\uf489"
+	IconPython     = "\ue73c" 
+	IconYaml       = "\ue6a8" 
+
+	// DevOps & Tools
+	IconGit        = "\uf1d3" 
+	IconDocker     = "\uf308" 
+	IconCI         = "\uf427"
+	IconTerraform  = "\ue69a" 
+	IconK8s        = "\ufd31" 
+	IconNetwork    = "\uf6ff" 
+
+	// Cloud Services
+	IconAWS        = "\ue7ad" 
+
+	// Social & Links
+	IconLinkedIn   = "\uf08c" 
+	IconGitHub     = "\uf09b" 
+	IconMedium     = "\uf044" 
 )
 
 type Node struct {
@@ -23,149 +73,56 @@ func NewFileSystem() *FileSystem {
 	root := &Node{
 		Name:     "abhinav",
 		IsDir:    true,
+		Icon:     ColorPurple + IconRoot + ColorReset,
 		Children: make(map[string]*Node),
 	}
 
-	// Languages
-	root.Children["languages"] = &Node{
-		Name:        "languages",
-		Icon: 		 "</>",
-		IsDir:       true,
-		Children:    make(map[string]*Node),
+	addFolder := func(parent *Node, name, icon string) *Node {
+		node := &Node{
+			Name:     name,
+			Icon:     icon,
+			IsDir:    true,
+			Children: make(map[string]*Node),
+		}
+		parent.Children[name] = node
+		return node
 	}
 
-	root.Children["languages"].Children["Golang"] = &Node{
-		Name:     "Go",
-		Icon: 		"",
-		IsDir:    false,
-		Children: make(map[string]*Node),
+	addFile := func(parent *Node, name, icon, desc string) {
+		parent.Children[name] = &Node{
+			Name:        name,
+			Icon:        icon,
+			IsDir:       false,
+			Description: desc,
+			Children:    make(map[string]*Node),
+		}
 	}
 
-	root.Children["languages"].Children["Javascript"] = &Node{
-		Name:     "Javascript",
-		Icon: 		"",
-		IsDir:    false,
-		Children: make(map[string]*Node),
-	}
+	langs := addFolder(root, "languages", ColorBlue+IconCode+ColorReset)
+	addFile(langs, "Golang", ColorCyan+IconGo+ColorReset, "Microservices, CLI tools, Concurrent systems")
+	addFile(langs, "Javascript", ColorOrange+IconJS+ColorReset, "Frontend scripting, Node.js tooling")
+	addFile(langs, "Bash", ColorComment+IconBash+ColorReset, "Automation scripts, Linux system administration")
+	addFile(langs, "Python", ColorBlue+IconPython+ColorReset, "Data processing, scripting, quick prototyping")
+	addFile(langs, "Yaml", ColorRed+IconYaml+ColorReset, "Kubernetes manifests, Docker Compose, CI/CD pipelines")
 
-	root.Children["languages"].Children["Bash"] = &Node{
-		Name:     "Bash",
-		Icon: 		"",
-		IsDir:    false,
-		Children: make(map[string]*Node),
-	}
+	tools := addFolder(root, "tools", ColorOrange+IconTools+ColorReset)
+	addFile(tools, "version-control", ColorRed+IconGit+ColorReset, "Git workflows, branching strategies, rebase")
+	addFile(tools, "containerization", ColorBlue+IconDocker+ColorReset, "Docker, multi-stage builds, image optimization")
+	addFile(tools, "ci-cd", ColorCyan+IconCI+ColorReset, "GitHub Actions, Jenkins pipelines")
+	addFile(tools, "iac", ColorPurple+IconTerraform+ColorReset, "Terraform - Infrastructure as Code")
+	addFile(tools, "orchestration", ColorBlue+IconK8s+ColorReset, "Kubernetes - Deployments, Services, Helm")
+	addFile(tools, "networking", ColorOrange+IconNetwork+ColorReset, "HTTP/S, TCP/IP, SSH, DNS, VPN, Firewalls")
 
-	root.Children["languages"].Children["Python"] = &Node{
-		Name:     "Python",
-		Icon: 		"",
-		IsDir:    false,
-		Children: make(map[string]*Node),
-	}
-
-	root.Children["languages"].Children["Yaml"] = &Node{
-		Name:     "Yaml",
-		Icon: 		"",
-		IsDir:    false,
-		Children: make(map[string]*Node),
-	}
+	cloud := addFolder(root, "cloud", ColorOrange+IconCloud+ColorReset)
+	aws := addFolder(cloud, "AWS", ColorOrange+IconAWS+ColorReset)
+	addFile(aws, "compute", ColorOrange+IconTools+ColorReset, "EC2, ECS, ECR, EKS")
+	addFile(aws, "networking", ColorBlue+IconNetwork+ColorReset, "VPC, Route53, ALB, Gateways")
 
 
-	// Tools
-	root.Children["tools"] = &Node{
-		Name:     "tools",
-		Icon: 		"🛠",
-		IsDir:    true,
-		Children: make(map[string]*Node),
-	}
-
-	root.Children["tools"].Children["version control"] = &Node{
-		Name:     "version control",
-		Icon: 		"",
-		Description: "Git",
-		IsDir:    false,
-		Children: make(map[string]*Node),
-	}
-
-	root.Children["tools"].Children["containerization"] = &Node{
-		Name:     "containerization",
-		Description: "Docker",
-		IsDir:    false,
-		Children: make(map[string]*Node),
-	}
-
-	root.Children["tools"].Children["CI/Cd"] = &Node{
-		Name:     "CI/CD",
-		Description: "Github Actions, Jenkins",
-		IsDir:    false,
-		Children: make(map[string]*Node),
-	}
-
-	root.Children["tools"].Children["IaC"] = &Node{
-		Name:     "IaC",
-		Description: "Terraform",
-		IsDir:    false,
-		Children: make(map[string]*Node),
-	}
-
-	root.Children["tools"].Children["conatiner orchestration"] = &Node{
-		Name:     "conatiner orchestration",
-		Description: "Kubernetes",
-		IsDir:    false,
-		Children: make(map[string]*Node),
-	}
-
-	root.Children["tools"].Children["networking"] = &Node{
-		Name:     "networking",
-		Description: "Https/Http, Tcp/Ip, SSH, DNS, VPN, Firewall",
-		IsDir:    false,
-		Children: make(map[string]*Node),
-	}
-
-
-	// Socials
-	root.Children["socials"] = &Node{
-		Name:     "socials",
-		Icon: 		"🌐",
-		IsDir:    true,
-		Children: make(map[string]*Node),
-	}
-
-	root.Children["socials"].Children["linkedin"] = &Node{
-		Name:     "linkedin",
-		Icon: 		"",
-		Description: "linkedin.com/in/08abhinav",
-		IsDir:    false,
-		Children: make(map[string]*Node),
-	}
-
-	root.Children["socials"].Children["github"] = &Node{
-		Name:     "github",
-		Description: "github.com/08abhinav",
-		IsDir:    false,
-		Children: make(map[string]*Node),
-	}
-
-	root.Children["socials"].Children["medium"] = &Node{
-		Name:     "medium",
-		Description: "medium.com/@abhinavnegi101",
-		IsDir:    false,
-		Children: make(map[string]*Node),
-	}
-
-	// Cloud
-	root.Children["cloud"] = &Node{
-		Name:     "cloud",
-		Icon: 	"☁",
-		IsDir:    true,
-		Children: make(map[string]*Node),
-	}
-
-	root.Children["cloud"].Children["AWS"] = &Node{
-		Name:     "AWS",
-		IsDir:    true,
-		Description: "VPC, IAM, EC2, ALB, ECS, ECR, EKS",
-		Children: make(map[string]*Node),
-	}
+	socials := addFolder(root, "socials", ColorPurple+IconSocial+ColorReset)
+	addFile(socials, "linkedin", ColorBlue+IconLinkedIn+ColorReset, "linkedin.com/in/08abhinav")
+	addFile(socials, "github", ColorComment+IconGitHub+ColorReset, "github.com/08abhinav")
+	addFile(socials, "medium", ColorCyan+IconMedium+ColorReset, "medium.com/@abhinavnegi101")
 
 	return &FileSystem{
 		Root:        root,
@@ -180,7 +137,6 @@ func (fs *FileSystem) ChangeDirectory(target string) error {
 
 	target = strings.TrimSpace(target)
 
-	// Home directory
 	if target == "~" || target == "/" {
 		fs.Currentpath = "/root/abhinav"
 		return nil
@@ -192,9 +148,13 @@ func (fs *FileSystem) ChangeDirectory(target string) error {
 		return fmt.Errorf("cd: %s: outside filesystem", target)
 	}
 
-	_, err := fs.ResolvePath(newPath)
+	node, err := fs.ResolvePath(newPath)
 	if err != nil {
 		return fmt.Errorf("cd: %s: no such directory", target)
+	}
+
+	if !node.IsDir {
+		return fmt.Errorf("cd: %s: Not a directory", target)
 	}
 
 	fs.Currentpath = newPath
@@ -255,38 +215,45 @@ func (fs *FileSystem) ResolvePath(p string) (*Node, error) {
 }
 
 func (fs *FileSystem) ListHelper(target string) {
-	var dir *Node
-	var err error
+	var targetPath string
+	target = strings.TrimSpace(target)
 
-	if strings.TrimSpace(target) == "" {
-		target = fs.Currentpath
+	if target == "" {
+		targetPath = fs.Currentpath
+	} else if strings.HasPrefix(target, "/") {
+		targetPath = path.Clean(target)
 	} else {
-		target = strings.TrimSpace(target)
-
-		if strings.HasPrefix(target, "/") {
-			target = path.Clean(target)
-		} else {
-			target = path.Join(fs.Currentpath, target)
-		}
+		targetPath = path.Join(fs.Currentpath, target)
 	}
 
-	dir, err = fs.ResolvePath(target)
-
+	dir, err := fs.ResolvePath(targetPath)
 	if err != nil {
-		fmt.Println(err)
+		fmt.Printf("%sls: cannot access '%s': No such file or directory%s\n", ColorRed, target, ColorReset)
 		return
 	}
 
 	if !dir.IsDir {
-		fmt.Println(dir.Name)
+		fmt.Printf("%s  %s %s->%s %s\n", dir.Icon, dir.Name, ColorComment, ColorReset, dir.Description)
 		return
 	}
 
-	for _, child := range dir.Children {
-		if len(child.Description) != 0{
-			fmt.Printf("%s %s -> %s \n", child.Icon, child.Name, child.Description)
-		}else{
-			fmt.Printf("%s %s\n", child.Icon, child.Name)
+	keys := make([]string, 0, len(dir.Children))
+	for k := range dir.Children {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for _, k := range keys {
+		child := dir.Children[k]
+		if child.IsDir {
+			fmt.Printf("  %s  %s%s%s/\n", child.Icon, ColorBold+ColorBlue, child.Name, ColorReset)
+		} else {
+			if len(child.Description) > 0 {
+				fmt.Printf("  %s  %-20s %s%s%s\n", child.Icon, child.Name, ColorComment, child.Description, ColorReset)
+			} else {
+				fmt.Printf("  %s  %s\n", child.Icon, child.Name)
+			}
 		}
 	}
 }
+
